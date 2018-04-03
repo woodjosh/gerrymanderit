@@ -10,7 +10,7 @@ typedef struct {
 	int Vdem, Vgop;	
 	double intPtLat, intPtLon;
 	int area;
-	vector<Block*> neighbours;
+	vector<string> neighbours;
 	int district;
 	int population; 
 } Block;
