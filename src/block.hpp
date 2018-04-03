@@ -9,5 +9,6 @@ typedef struct {
 	int area;
 	std::vector<Block*> neighbours;
 	int district;
+	int population; 
 } Block;
 #endif
