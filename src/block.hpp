@@ -3,14 +3,14 @@
 #include <string>
 #include <vector>
 
-using namspace std
+using namspace std;
 
 typedef struct {
 	string blockid;
 	int Vdem, Vgop;	
 	double intPtLat, intPtLon;
 	int area;
-	vector<string> neighbours;
+	vector<int> neighbours; //Indices of the neighboring blocks
 	int district;
 	int population; 
 } Block;
