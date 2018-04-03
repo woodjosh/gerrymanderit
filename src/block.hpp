@@ -2,12 +2,15 @@
 #define __BLOCK_H__
 #include <string>
 #include <vector>
+
+using namspace std
+
 typedef struct {
-	std::string blockid;
+	string blockid;
 	int Vdem, Vgop;	
 	double intPtLat, intPtLon;
 	int area;
-	std::vector<Block*> neighbours;
+	vector<Block*> neighbours;
 	int district;
 	int population; 
 } Block;
