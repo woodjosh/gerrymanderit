@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-using namspace std;
+using namespace std;
 
 typedef struct {
 	string blockid;
