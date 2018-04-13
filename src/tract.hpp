@@ -36,11 +36,17 @@ typedef struct {
 } Tract;
 
 typedef struct {
+	string countyName;
+	int Vdem; 
+	int Vgop; 	
+} ctyVote;
+
+typedef struct {
 	string districtId;
 	string districtName;
 	string countyId;
 	string countyName;  
-	int TractCount; 	
+	int popCount; 	
 } nameIdCorr;
 
 //Returns a vector of Tracts with all of the filled in information. 
@@ -48,7 +54,7 @@ vector<Tract> getTractData();
 //Adds county names and ids to a struct made for reading from the txt file
 vector<nameIdCorr> countyNameId();
 //adds county name, dem votes and rep votes to a vector of vectors of strings
-vector<vector<string> > getVoteDataCty();
+vector<ctyVote> getVoteDataCty();
 //Returns position of n-th occurence of a char in a string
 int strpos(string haystack, char needle, int nth);
 //displays nameIdCorr at index n

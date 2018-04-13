@@ -8,12 +8,12 @@ using namespace std;
 
 /*************************************************************************************
 Returns a vector of Tracts with all of the filled in information. 
-Pulls information from CensusDataIl.csv, PrecinctDataIl.csv, and VTDIlNoSpace.txt 
+Pulls information from Tract_Pop_Loc.csv, PrecinctDataIl.csv, and VTDIlNoSpace.txt 
 *************************************************************************************/
 vector<Tract> getTractData(){
 	vector<Tract> TractData(451554); 
 	//open file
-	csvstream censusIn("CensusDataIl.csv"); 
+	csvstream censusIn("Tract_Pop_Loc.csv"); 
 	
 	map<string, string> row; 
 	
@@ -34,8 +34,6 @@ vector<Tract> getTractData(){
 			TractData.at(n).intPtLon = stod(t);
 		else 
 			TractData.at(n).intPtLon = -1* stod(t);
-		//districtId
-		TractData.at(n).districtId = row["VTD"];
 		//countyId
 		TractData.at(n).countyId = row["COUNTY"];
 		//population
@@ -49,21 +47,21 @@ vector<Tract> getTractData(){
 		for(int j = 0; j < nameId.size(); j++){
 			if(TractData.at(i).countyId == nameId.at(j).countyId){
 				TractData.at(i).countyName = nameId.at(j).countyName;
-				nameId.at(j).TractCount++;  
+				nameId.at(j).popCount+=TractData.at(i).population;  
 			}
 		}
 	}
   
     //add vote data to Tract if countyName matches 
     //NOTE: Since vote and nameId are in the same order, can reference the same index 
-    //      of both and get corresponding info (Tracts per county in this case)
-    vector<vector<string> > vote = getVoteDataCty(); 
+    //      of both and get corresponding info (populatoin per county in this case)
+    vector<ctyVote> vote = getVoteDataCty(); 
 
     for(int i = 0; i < vote.size(); i++){
 		for(int j = 0; j < TractData.size(); j++){
-			if(TractData.at(j).countyName == vote.at(i).at(0) && vote.at(i).at(0)!=""){
-				TractData.at(j).Vdem = stod(vote.at(i).at(1),nullptr)/nameId.at(i).TractCount;
-				TractData.at(j).Vgop = stod(vote.at(i).at(2),nullptr)/nameId.at(i).TractCount;  
+			if(TractData.at(j).countyName == vote.at(i).countyName && vote.at(i).countyName!=""){
+				TractData.at(j).Vdem = vote.at(i).Vdem/nameId.at(i).popCount*TractData.at(j).population;
+				TractData.at(j).Vgop = vote.at(i).Vgop/nameId.at(i).popCount*TractData.at(j).population;  
 			}
 		}
 	}
@@ -84,7 +82,7 @@ vector<nameIdCorr> countyNameId(){
 	while(voteIn >> row){
 		temp.countyId = row["ID"].substr(2,3); 
 		temp.countyName = row["NAME"] + " County"; 
-		temp.TractCount = 0;
+		temp.popCount = 0;
 		nameId.push_back(temp); 		
 	}
 	
@@ -98,16 +96,16 @@ column 0: county name
 column 1: democratic votes
 column 2: republican votes
 *************************************************************************************/
-vector<vector<string> > getVoteDataCty(){
-	vector<vector<string> > voteDataCty;  
-	vector<string> temp;
+vector<ctyVote> getVoteDataCty(){
+	vector<ctyVote> voteDataCty;  
+	ctyVote temp;
 	csvstream voteIn("CtyVote.csv"); 
 	map<string, string> row; 
 	
 	while(voteIn >> row){
-		temp = {row["COUNTY"]+" County",
-				row["DEM"],
-				row["REP"]};
+		temp.countyName = row["COUNTY"]+" County";
+		temp.Vdem = stod(row["DEM"],nullptr);
+		temp.Vgop =	stod(row["REP"],nullptr);
 		
 		voteDataCty.push_back(temp); 		
 	}
@@ -142,7 +140,7 @@ displays nameIdCorr at index n
 void displayNameIdCorr(vector<nameIdCorr> nameId, int n){
 	cout << "CountyName:  " << nameId.at(n).countyName<< "\n" 
 	     << "CountyId:    " << nameId.at(n).countyId << "\n"
-		 << "TractCt:     " << nameId.at(n).TractCount << "\n";
+		 << "PopCt:       " << nameId.at(n).popCount << "\n";
 	return; 
 }
 
@@ -225,7 +223,7 @@ vector<nameIdCorr> districtNameId(){
 		temp.districtName = district;
 		temp.countyId = s.substr(second,3);
 		temp.countyName = s.substr(third, fourth-third-1);  
-		temp.TractCount = 0; 
+		temp.popCount = 0; 
 				
 		nameId.push_back(temp); 
 	}
