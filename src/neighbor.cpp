@@ -63,7 +63,7 @@ void readneighbor(vector<string> &blockid, vector< vector <string> > &neighbors)
     string ids;
     
     ifstream queenfile;
-    queenfile.open("queen.gal");
+    queenfile.open("rook.gal");
     int i = 0;
     getline(queenfile,in);
     
