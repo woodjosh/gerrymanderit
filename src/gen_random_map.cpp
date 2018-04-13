@@ -5,8 +5,6 @@
 #include <algorithm>
 #include "assert.h"
 
-//TODO: Optimize!!!
-
 using namespace std;
 
 double block_distance(Block a, Block b){
@@ -14,26 +12,26 @@ double block_distance(Block a, Block b){
 	double lonDiff = a.intPtLon - b.intPtLon;
 	return sqrt(latDiff * latDiff + lonDiff * lonDiff);
 }
-
+#define ABS(X) (X < 0 ? -X : X)
 //the heuristic we'll use to make sure they are the same populations
-int pop_diff_m(int *district_pops, int num_districts, int target_pop_per_district){
-	int diff = 0;
+uint64_t pop_diff_m(uint64_t *district_pops, unsigned int num_districts, unsigned int target_pop_per_district){
+	uint64_t diff = 0;
 	for(int i = 0; i<num_districts; i++){
-		diff += abs(district_pops[i] - target_pop_per_district);
+		diff += ABS((int64_t)(district_pops[i] - target_pop_per_district));
 	}
 	return diff;
 }
 
-int pop_diff_e(int *district_pops, int num_districts, int target_pop_per_district){
-	long long sum = 0;
+uint64_t pop_diff_e(uint64_t *district_pops, unsigned int num_districts, unsigned int target_pop_per_district){
+	uint64_t sum = 0;
 	for(int i = 0; i<num_districts; i++){
 		int diff = district_pops[i] - target_pop_per_district;
 		sum += diff * diff;
 	}
-	return (int)sqrt(sum);
+	return sqrt(sum);
 }
 
-int* gen_voronoi_map(vector<Block> &map, int num_districts, int *district_pops){
+unsigned int* gen_voronoi_map(vector<Block> &map, unsigned int num_districts, uint64_t *district_pops){
 	printf("Generating A random voronoi districting...");
 	//choose initial seeds
 	size_t map_sz = map.size();
@@ -44,7 +42,7 @@ int* gen_voronoi_map(vector<Block> &map, int num_districts, int *district_pops){
 		return NULL;
 	}
 
-	int* districts = (int*) malloc(sizeof(int) * map.size());
+	unsigned int* districts = (unsigned int*) malloc(sizeof(unsigned int) * map.size());
 	if(districts == NULL){
 		fprintf(stderr, "\nCould not allocate memory for districts in gen_voronoi_map\n");
 		free(init_seeds);
@@ -111,15 +109,15 @@ void calculate_edges(vector<Block> &map, vector<vector<int> > &edges){
 	}
 }
 
-int* gen_random_map(vector<Block> &map, int num_districts, double tolerance, int (*pd)(int*, int, int)){
+unsigned int* gen_random_map(vector<Block> &map, unsigned int num_districts, double tolerance, uint64_t (*pd)(uint64_t*, unsigned int, unsigned int)){
 	printf("Generating a map with districts of equal population...\n");
 
-	int *district_pops = (int*) calloc(num_districts, sizeof(int));
+	uint64_t *district_pops = (uint64_t*) calloc(num_districts, sizeof(uint64_t));
 	if(district_pops == NULL){
 		fprintf(stderr, "Could not allocate district_pops in gen_random_map\n");
 		return NULL;
 	}
-	int* districts = gen_voronoi_map(map, num_districts, district_pops);
+	unsigned int* districts = gen_voronoi_map(map, num_districts, district_pops);
 	if(districts == NULL){
 		free(district_pops);
 		return NULL;
@@ -129,18 +127,18 @@ int* gen_random_map(vector<Block> &map, int num_districts, double tolerance, int
 	calculate_edges(map, edges);
 	
 	//get target district pop
-	int total_pop = 0;
+	unsigned int total_pop = 0;
 	for(int i = 0; i < num_districts; i++){
 		total_pop += district_pops[i];
 	}
-	int target_pop_per_district = total_pop / num_districts;
-	
+	unsigned int target_pop_per_district = total_pop / num_districts;
+	printf("Total population: %u\tTarget Population per District: %u\n", total_pop, target_pop_per_district);
 	//keep updating until the average population difference is less than the tolerance
 	int mod_block; //index of block to add or remove to district
 	int new_distr, old_distr;
 	bool add = false; //true if adding, false otherwise
-	int cur_pop_diff = pd(district_pops, num_districts, target_pop_per_district);
-	int num_iters = 0;
+	uint64_t cur_pop_diff = pd(district_pops, num_districts, target_pop_per_district);
+	unsigned int num_iters = 0;
 	while(cur_pop_diff / num_districts > tolerance*total_pop){
 		//suggest modification
 		unsigned int d = rand() % num_districts; //district to be modified
@@ -171,7 +169,7 @@ int* gen_random_map(vector<Block> &map, int num_districts, double tolerance, int
 			map[mod_block].district = d;
 		}
 		//check if imporvement
-		int new_pop_diff = pd(district_pops, num_districts, target_pop_per_district);
+		uint64_t new_pop_diff = pd(district_pops, num_districts, target_pop_per_district);
 		if(new_pop_diff < cur_pop_diff){
 			cur_pop_diff = new_pop_diff;
 			calculate_edges(map, edges);
@@ -197,14 +195,17 @@ int* gen_random_map(vector<Block> &map, int num_districts, double tolerance, int
 		}
 	}
 
-	free(district_pops);
-
 	size_t map_sz = map.size();
 	for(int i = 0; i<map_sz; i++){
 		districts[i] = map[i].district;
 	}
 	printf("...Done\n");
-	printf("Average Population Difference: %d(%f%%)\nCompleted in %d iterations\n", cur_pop_diff/num_districts, 
-			100 *((float)cur_pop_diff/num_districts)/total_pop, num_iters);
+	int avg_pop_diff = cur_pop_diff/num_districts;
+	float per_pop_diff = 100 * ((float)avg_pop_diff)/total_pop;
+	printf("Total Population Difference: %u\n", cur_pop_diff);
+	printf("Average Population Difference: %d(%f%%)\n",avg_pop_diff, per_pop_diff);
+	printf("Completed in %d iterations\n", num_iters);
+
+	free(district_pops);
 	return districts;
 }
