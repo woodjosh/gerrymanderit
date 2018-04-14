@@ -11,7 +11,7 @@ Returns a vector of Tracts with all of the filled in information.
 Pulls information from Tract_Pop_Loc.csv, PrecinctDataIl.csv, and VTDIlNoSpace.txt 
 *************************************************************************************/
 vector<Tract> getTractData(){
-	vector<Tract> TractData(451554); 
+	vector<Tract> TractData(3124); 
 	//open file
 	csvstream censusIn("Tract_Pop_Loc.csv"); 
 	
@@ -51,17 +51,16 @@ vector<Tract> getTractData(){
 			}
 		}
 	}
-  
     //add vote data to Tract if countyName matches 
     //NOTE: Since vote and nameId are in the same order, can reference the same index 
-    //      of both and get corresponding info (populatoin per county in this case)
+    //      of both and get corresponding info (population per county in this case)
     vector<ctyVote> vote = getVoteDataCty(); 
 
     for(int i = 0; i < vote.size(); i++){
 		for(int j = 0; j < TractData.size(); j++){
-			if(TractData.at(j).countyName == vote.at(i).countyName && vote.at(i).countyName!=""){
-				TractData.at(j).Vdem = vote.at(i).Vdem/nameId.at(i).popCount*TractData.at(j).population;
-				TractData.at(j).Vgop = vote.at(i).Vgop/nameId.at(i).popCount*TractData.at(j).population;  
+			if(TractData.at(j).countyName == vote.at(i).countyName){
+				TractData.at(j).Vdem = (((double)vote.at(i).Vdem) / ((double)nameId.at(i).popCount)) * ((double)TractData.at(j).population);
+				TractData.at(j).Vgop = (((double)vote.at(i).Vgop) / ((double)nameId.at(i).popCount)) * ((double)TractData.at(j).population);  
 			}
 		}
 	}
