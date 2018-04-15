@@ -1,4 +1,4 @@
-#include "block.hpp"
+#include "tract.hpp"
 #include <map>
 #include <iostream> 
 #include <fstream> 
@@ -7,68 +7,65 @@
 using namespace std;
 
 /*************************************************************************************
-Returns a vector of blocks with all of the filled in information. 
-Pulls information from CensusDataIl.csv, PrecinctDataIl.csv, and VTDIlNoSpace.txt 
+Returns a vector of Tracts with all of the filled in information. 
+Pulls information from Tract_Pop_Loc.csv, PrecinctDataIl.csv, and VTDIlNoSpace.txt 
 *************************************************************************************/
-vector<Block> getBlockData(){
-	vector<Block> blockData(451554); 
+vector<Tract> getTractData(){
+	vector<Tract> TractData(3124); 
 	//open file
-	csvstream censusIn("CensusDataIl.csv"); 
+	csvstream censusIn("Tract_Pop_Loc.csv"); 
 	
 	map<string, string> row; 
 	
-	//extract blockid, intPtLat, intPtLon,district, and population
+	//exTract Tractid, intPtLat, intPtLon,district, and population
 	int n = 0; 
 	while(censusIn >> row){
-		//blockid
-		blockData.at(n).blockid = row["GEOID10"];
+		//Tractid
+		TractData.at(n).Tractid = row["GEOID10"];
 		//intPtLat
 		string s = row["INTPTLAT"]; 
 		if(s.at(0) == '+')	
-			blockData.at(n).intPtLat = stod(s);
+			TractData.at(n).intPtLat = stod(s);
 		else 
-			blockData.at(n).intPtLat = -1* stod(s);
+			TractData.at(n).intPtLat = -1* stod(s);
 		//intPtLon
 		string t = row["INTPTLON"]; 
 		if(s.at(0) == '+')	
-			blockData.at(n).intPtLon = stod(t);
+			TractData.at(n).intPtLon = stod(t);
 		else 
-			blockData.at(n).intPtLon = -1* stod(t);
-		//districtId
-		blockData.at(n).districtId = row["VTD"];
+			TractData.at(n).intPtLon = -1* stod(t);
 		//countyId
-		blockData.at(n).countyId = row["COUNTY"];
+		TractData.at(n).countyId = row["COUNTY"];
 		//population
-		blockData.at(n).population = stod(row["P0010001"]);
+		TractData.at(n).population = stod(row["P0010001"]);
 		n++;  
 	}
 	//add county name
 	vector<nameIdCorr> nameId = countyNameId(); 
 	
-	for(int i = 0; i < blockData.size(); i++){
+	for(int i = 0; i < TractData.size(); i++){
 		for(int j = 0; j < nameId.size(); j++){
-			if(blockData.at(i).countyId == nameId.at(j).countyId){
-				blockData.at(i).countyName = nameId.at(j).countyName;
-				nameId.at(j).blockCount++;  
+			if(TractData.at(i).countyId == nameId.at(j).countyId){
+				TractData.at(i).countyName = nameId.at(j).countyName;
+				nameId.at(j).popCount+=TractData.at(i).population;  
 			}
 		}
 	}
-  
-    //add vote data to block if countyName matches 
+    //add vote data to Tract if countyName matches 
     //NOTE: Since vote and nameId are in the same order, can reference the same index 
-    //      of both and get corresponding info (blocks per county in this case)
-    vector<vector<string> > vote = getVoteDataCty(); 
+    //      of both and get corresponding info (population per county in this case)
+    vector<ctyVote> vote = getVoteDataCty(); 
 
     for(int i = 0; i < vote.size(); i++){
-		for(int j = 0; j < blockData.size(); j++){
-			if(blockData.at(j).countyName == vote.at(i).at(0) && vote.at(i).at(0)!=""){
-				blockData.at(j).Vdem = stod(vote.at(i).at(1),nullptr)/nameId.at(i).blockCount;
-				blockData.at(j).Vgop = stod(vote.at(i).at(2),nullptr)/nameId.at(i).blockCount;  
+		for(int j = 0; j < TractData.size(); j++){
+			if(TractData.at(j).countyName == vote.at(i).countyName){
+				TractData.at(j).Vdem = (((double)vote.at(i).Vdem) / ((double)nameId.at(i).popCount)) * ((double)TractData.at(j).population);
+				TractData.at(j).Vgop = (((double)vote.at(i).Vgop) / ((double)nameId.at(i).popCount)) * ((double)TractData.at(j).population);  
 			}
 		}
 	}
 
-	return blockData; 
+	return TractData; 
 }
 
 /*************************************************************************************
@@ -84,7 +81,7 @@ vector<nameIdCorr> countyNameId(){
 	while(voteIn >> row){
 		temp.countyId = row["ID"].substr(2,3); 
 		temp.countyName = row["NAME"] + " County"; 
-		temp.blockCount = 0;
+		temp.popCount = 0;
 		nameId.push_back(temp); 		
 	}
 	
@@ -98,16 +95,16 @@ column 0: county name
 column 1: democratic votes
 column 2: republican votes
 *************************************************************************************/
-vector<vector<string> > getVoteDataCty(){
-	vector<vector<string> > voteDataCty;  
-	vector<string> temp;
+vector<ctyVote> getVoteDataCty(){
+	vector<ctyVote> voteDataCty;  
+	ctyVote temp;
 	csvstream voteIn("CtyVote.csv"); 
 	map<string, string> row; 
 	
 	while(voteIn >> row){
-		temp = {row["COUNTY"]+" County",
-				row["DEM"],
-				row["REP"]};
+		temp.countyName = row["COUNTY"]+" County";
+		temp.Vdem = stod(row["DEM"],nullptr);
+		temp.Vgop =	stod(row["REP"],nullptr);
 		
 		voteDataCty.push_back(temp); 		
 	}
@@ -142,7 +139,7 @@ displays nameIdCorr at index n
 void displayNameIdCorr(vector<nameIdCorr> nameId, int n){
 	cout << "CountyName:  " << nameId.at(n).countyName<< "\n" 
 	     << "CountyId:    " << nameId.at(n).countyId << "\n"
-		 << "BlockCt:     " << nameId.at(n).blockCount << "\n";
+		 << "PopCt:       " << nameId.at(n).popCount << "\n";
 	return; 
 }
 
@@ -157,17 +154,17 @@ void displayVoteData(vector<vector<string> > vote, int n){
 }
 
 /*************************************************************************************
-displays block at index n
+displays Tract at index n
 *************************************************************************************/
-void displayBlock(vector<Block> blockData, int n){
-	cout << "BlockID:     " << blockData.at(n).blockid << "\n" 
-		 << "IntPtLat:    " << blockData.at(n).intPtLat << "\n"
-		 << "IntPtLon:    " << blockData.at(n).intPtLon << "\n"
-		 << "CountyId:    " << blockData.at(n).countyId << "\n"
-		 << "CountyName:  " << blockData.at(n).countyName << "\n"
-		 << "Population:  " << blockData.at(n).population << "\n"
-		 << "Vdem:        " << blockData.at(n).Vdem << "\n" 
-		 << "Vgop:        " << blockData.at(n).Vgop<< "\n"; 
+void displayTract(vector<Tract> TractData, int n){
+	cout << "TractID:     " << TractData.at(n).Tractid << "\n" 
+		 << "IntPtLat:    " << TractData.at(n).intPtLat << "\n"
+		 << "IntPtLon:    " << TractData.at(n).intPtLon << "\n"
+		 << "CountyId:    " << TractData.at(n).countyId << "\n"
+		 << "CountyName:  " << TractData.at(n).countyName << "\n"
+		 << "Population:  " << TractData.at(n).population << "\n"
+		 << "Vdem:        " << TractData.at(n).Vdem << "\n" 
+		 << "Vgop:        " << TractData.at(n).Vgop<< "\n"; 
 	return; 
 }
 
@@ -178,20 +175,20 @@ is not being used
 *************************************************************************************
 *************************************************************************************/
 
-//this was to be used in getBlockData()
+//this was to be used in getTractData()
 	/*
 	//add district name if districtId and nameId match in the correlation file
-	//add one to block count so we know how many census blocks are in each precinct
+	//add one to Tract count so we know how many census Tracts are in each precinct
 	//make more efficient if time
 	for(int i = 0; i < nameId.size(); i++){
-		for(int j = 0; j < blockData.size(); j++){
-			if(blockData.at(j).districtId == nameId.at(i).districtId 
-			   && blockData.at(j).countyId == nameId.at(i).countyId){
-				blockData.at(j).districtName = nameId.at(i).districtName;
-				nameId.at(i).blockCount ++; 
+		for(int j = 0; j < TractData.size(); j++){
+			if(TractData.at(j).districtId == nameId.at(i).districtId 
+			   && TractData.at(j).countyId == nameId.at(i).countyId){
+				TractData.at(j).districtName = nameId.at(i).districtName;
+				nameId.at(i).TractCount ++; 
 				//while we are here, initialize Vgop and Vdem to 0
-				blockData.at(j).Vgop = 0; 
-				blockData.at(j).Vdem = 0;  
+				TractData.at(j).Vgop = 0; 
+				TractData.at(j).Vdem = 0;  
 			}
 		}
 	}
@@ -225,7 +222,7 @@ vector<nameIdCorr> districtNameId(){
 		temp.districtName = district;
 		temp.countyId = s.substr(second,3);
 		temp.countyName = s.substr(third, fourth-third-1);  
-		temp.blockCount = 0; 
+		temp.popCount = 0; 
 				
 		nameId.push_back(temp); 
 	}
