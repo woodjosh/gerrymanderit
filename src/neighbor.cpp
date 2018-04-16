@@ -97,10 +97,11 @@ void readneighbor(vector<string> &tractid, vector< vector <string> > &neighbors)
         vector<string> awater_sqmi(3500);
         vector<string> lat(3500);
         vector<string> lon(3500);
+        vector<string> trash(3500)
         
         ifstream file("area.rtf");
         int i = 0;
-        file>>state[i]>>geoid[i]>>aland[i]>>awater[i]>>aland_sqmi[i]>>awater_sqmi[i]>>lat[i]>>lon[i];
+        file>>state[i]>>geoid[i]>>aland[i]>>awater[i]>>aland_sqmi[i]>>awater_sqmi[i]>>lat[i]>>lon[i]>>trash[i];
         while (!file.fail())
         {
             for(int j = 0; j<sz; j++)
@@ -113,7 +114,7 @@ void readneighbor(vector<string> &tractid, vector< vector <string> > &neighbors)
                 }
             }
             i++;
-            file>>state[i]>>geoid[i]>>aland[i]>>awater[i]>>aland_sqmi[i]>>awater_sqmi[i]>>lat[i]>>lon[i];
+            file>>state[i]>>geoid[i]>>aland[i]>>awater[i]>>aland_sqmi[i]>>awater_sqmi[i]>>lat[i]>>lon[i]>>trash[i];
         }
     }
     
