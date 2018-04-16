@@ -98,7 +98,7 @@ void readneighbor(vector<string> &tractid, vector< vector <string> > &neighbors)
         vector<string> awater_sqmi(3500);
         vector<string> lat(3500);
         vector<string> lon(3500);
-        vector<string> trash(3500)
+        vector<string> trash(3500);
         
         ifstream file("area.rtf");
         int i = 0;
