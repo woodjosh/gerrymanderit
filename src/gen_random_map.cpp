@@ -113,6 +113,7 @@ unsigned int* gen_random_map(vector<Tract> &map, unsigned int num_districts, dou
 	printf("Generating a map with districts of equal population...\n");
 
 	uint64_t *district_pops = (uint64_t*) calloc(num_districts, sizeof(uint64_t));
+	fprintf(stderr, "Memory allocated");
 	if(district_pops == NULL){
 		fprintf(stderr, "Could not allocate district_pops in gen_random_map\n");
 		return NULL;

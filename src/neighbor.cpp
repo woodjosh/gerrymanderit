@@ -80,8 +80,7 @@ void readneighbor(vector<string> &tractid, vector< vector <string> > &neighbors)
         i++;
         getline(queenfile,in);
     }
-    
-} 
+}   
 void inputArea(vector<Tract> &tract) {
         int sz = (unsigned) tract.size();
         vector<string> state(3500);
