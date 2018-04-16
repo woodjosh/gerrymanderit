@@ -84,6 +84,7 @@ void readneighbor(vector<string> &tractid, vector< vector <string> > &neighbors)
         i++;
         getline(queenfile,in);
     }
+    }
     
     
     void inputArea(vector<Tract> &tract)
@@ -118,4 +119,3 @@ void readneighbor(vector<string> &tractid, vector< vector <string> > &neighbors)
         }
     }
     
-}
