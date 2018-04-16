@@ -139,7 +139,7 @@ unsigned int* gen_random_map(vector<Tract> &map, unsigned int num_districts, dou
 	bool add = false; //true if adding, false otherwise
 	uint64_t cur_pop_diff = pd(district_pops, num_districts, target_pop_per_district);
 	unsigned int num_iters = 0;
-	while(cur_pop_diff / num_districts > tolerance*total_pop){
+	while(cur_pop_diff / num_districts > tolerance*total_pop && num_iters < 1000000){
 		//suggest modification
 		unsigned int d = rand() % num_districts; //district to be modified
 		if(district_pops[d] > target_pop_per_district){//too many people in the district
