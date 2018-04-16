@@ -13,7 +13,7 @@ Pulls information from Tract_Pop_Loc.csv, PrecinctDataIl.csv, and VTDIlNoSpace.t
 vector<Tract> getTractData(){
 	vector<Tract> TractData(3124); 
 	//open file
-	csvstream censusIn("Tract_Pop_Loc.csv"); 
+	csvstream censusIn("../Census Data/Tract_Pop_Loc.csv"); 
 	
 	map<string, string> row; 
 	
@@ -21,7 +21,7 @@ vector<Tract> getTractData(){
 	int n = 0; 
 	while(censusIn >> row){
 		//Tractid
-		TractData.at(n).Tractid = row["GEOID10"];
+		TractData.at(n).tractid = row["GEOID10"];
 		//intPtLat
 		string s = row["INTPTLAT"]; 
 		if(s.at(0) == '+')	
@@ -75,7 +75,7 @@ comes from "CountyID.csv" a correlation file for county ids and county names
 vector<nameIdCorr> countyNameId(){
 	vector<nameIdCorr> nameId; 
 	nameIdCorr temp;
-	csvstream voteIn("CountyID.csv"); 
+	csvstream voteIn("../Census Data/CountyID.csv"); 
 	map<string, string> row; 
 	
 	while(voteIn >> row){
@@ -98,7 +98,7 @@ column 2: republican votes
 vector<ctyVote> getVoteDataCty(){
 	vector<ctyVote> voteDataCty;  
 	ctyVote temp;
-	csvstream voteIn("CtyVote.csv"); 
+	csvstream voteIn("../Census Data/CtyVote.csv"); 
 	map<string, string> row; 
 	
 	while(voteIn >> row){
@@ -157,7 +157,7 @@ void displayVoteData(vector<vector<string> > vote, int n){
 displays Tract at index n
 *************************************************************************************/
 void displayTract(vector<Tract> TractData, int n){
-	cout << "TractID:     " << TractData.at(n).Tractid << "\n" 
+	cout << "TractID:     " << TractData.at(n).tractid << "\n" 
 		 << "IntPtLat:    " << TractData.at(n).intPtLat << "\n"
 		 << "IntPtLon:    " << TractData.at(n).intPtLon << "\n"
 		 << "CountyId:    " << TractData.at(n).countyId << "\n"
@@ -241,10 +241,10 @@ column 2: republican votes
 vector<vector<string> > getVoteDataNew(){
 	vector<vector<string> > voteData;  
 	vector<string> temp;
-	csvstream voteInRep("RepublicanPrecinctData.csv"); 
+	csvstream voteInRep("../CensusData/RepublicanPrecinctData.csv"); 
 	map<string, string> row1; 
 	
-	csvstream voteInDem("DemocratPrecinctData.csv"); 
+	csvstream voteInDem("../CensusData/DemocratPrecinctData.csv"); 
 	map<string, string> row2; 
 	
 	
@@ -269,7 +269,7 @@ column 2: republican votes
 vector<vector<string> > getVoteData(){
 	vector<vector<string> > voteData;  
 	vector<string> temp;
-	csvstream voteIn("PrecinctDataIl.csv"); 
+	csvstream voteIn("../CensusData/PrecinctDataIl.csv"); 
 	map<string, string> row; 
 	
 	while(voteIn >> row){

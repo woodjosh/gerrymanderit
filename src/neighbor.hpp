@@ -7,4 +7,5 @@ using namespace std;
 
 void inputNeighbor(vector<Tract> &tract, vector < vector<string> > neighbors, vector<string> tractid);
 void readneighbor(vector<string> &tractid, vector< vector <string> > &neighbors);
+void inputArea(vector<Tract> &tract);
 #endif

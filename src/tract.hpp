@@ -22,7 +22,7 @@ Takes about 8 seconds to run through right now.
 using namespace std;
 
 typedef struct {
-	string Tractid;
+	string tractid;
 	double Vdem, Vgop;	
 	double intPtLat, intPtLon;
 	int area;
