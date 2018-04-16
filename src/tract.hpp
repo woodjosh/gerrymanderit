@@ -25,7 +25,7 @@ typedef struct {
 	string Tractid;
 	double Vdem, Vgop;	
 	double intPtLat, intPtLon;
-	int area;
+	double area;
 	vector<int> neighbours; //Indices of the neighboring Tracts
 	string countyId;
 	string countyName;  
